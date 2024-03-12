@@ -15,12 +15,11 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
         conexao = ModuloConexao.conector();
     }
     
-    private void consultar(){
-        String sql = "SELECT * FROM tbl_usuario WHERE id=?";
-        
+private void consultar(){
+        String sql = "SELECT * FROM tbl_usuarios WHERE id=?";
         try {
             pst = conexao.prepareStatement(sql);
-            pst.setString(1, inputID.getText());
+            pst.setString(1, inputId.getText());
             rs = pst.executeQuery();
             if (rs.next()){
                 inputNome.setText(rs.getString(2));
@@ -29,7 +28,6 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
             }
             else {
                 JOptionPane.showMessageDialog(null,"Esse usuario não existe.");
-                
                 inputNome.setText(null);
                 inputEmail.setText(null);
                 inputSenha.setText(null);
@@ -39,25 +37,72 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, e);
         }
     }
-    
     private void adicionar(){
         //comando para adicionar dados dentro do banco de dados
         String sql = "INSERT INTO tbl_usuarios(nome, email, senha) VALUES (?,?,?)";
-        
         try {
             pst = conexao.prepareStatement(sql);
             pst.setString(1, inputNome.getText());
             pst.setString(2, inputEmail.getText());
             pst.setString(3, inputSenha.getText());
-            pst.executeUpdate();
+            int adicionado = pst.executeUpdate();
+            //retorna 1 se estiver ok 
+            if (adicionado > 0){
+                JOptionPane.showMessageDialog(null, "USUARIO CADASTRADO!");
+                /*
+                    Exibe a nensagem e apaga caso inserido com sucesso.
+                    As linhas abaixo irá limpar o formulário.
+                */
+                inputId.setText(null);
+                inputNome.setText(null);
+                inputEmail.setText(null);
+                inputSenha.setText(null);
+            }
         }
         catch(Exception e){
             JOptionPane.showMessageDialog(null, closable);
         }
-        
-        
+    }
+    private void editar() {
+        String sql = "UPDATE tbl_usuarios SET nome=?, email=?, senha=? WHERE id=?";
+        try {
+            pst = conexao.prepareStatement(sql);
+            pst.setString(1, inputNome.getText());
+            pst.setString(2, inputEmail.getText());
+            pst.setString(3, inputSenha.getText());
+            pst.setString(4, inputId.getText());
+            int adicionado = pst.executeUpdate();
+            //retorna 1 se ok
+            if(adicionado > 0){
+                JOptionPane.showMessageDialog(null, "USUARIO ALTERADO COM SUCESSO");
+            }
+        }
+        catch(Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }      
     }
     
+    private void apagar(){
+        //a estrutura abaixo confirma a exclusão do usuario da tabela
+        int confirma = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja excluir este usuario?", "ATENÇÃO", JOptionPane.YES_NO_OPTION);
+        if (confirma == JOptionPane.YES_OPTION){
+            String sql = "DELETE FROM tbl_usuarios WHERE id=?";
+            try {
+                pst = conexao.prepareStatement(sql);
+                pst.setString(1, inputId.getText());
+                int apagado = pst.executeUpdate();
+                if (apagado > 0){
+                    JOptionPane.showMessageDialog(null, "Usuário Apagado!");
+                    inputNome.setText(null);
+                    inputEmail.setText(null);
+                    inputSenha.setText(null);
+                }
+            }
+            catch (Exception e){
+                JOptionPane.showMessageDialog(null, e);
+            }
+        }
+    }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -67,7 +112,7 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        inputID = new javax.swing.JTextField();
+        inputId = new javax.swing.JTextField();
         inputNome = new javax.swing.JTextField();
         inputEmail = new javax.swing.JTextField();
         inputSenha = new javax.swing.JTextField();
@@ -93,9 +138,9 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel9.setText("TELA DE CADASTRAR");
 
-        inputID.addActionListener(new java.awt.event.ActionListener() {
+        inputId.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputIDActionPerformed(evt);
+                inputIdActionPerformed(evt);
             }
         });
 
@@ -117,6 +162,11 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
 
         btnEditar.setText("Editar");
         btnEditar.setPreferredSize(new java.awt.Dimension(90, 25));
+        btnEditar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditarActionPerformed(evt);
+            }
+        });
 
         btnApagar.setText("Apagar");
         btnApagar.setPreferredSize(new java.awt.Dimension(90, 25));
@@ -144,7 +194,7 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
-                                        .addComponent(inputID, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(inputId, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
@@ -157,19 +207,17 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
                                         .addComponent(btnEditar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
                                         .addComponent(btnApagar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(inputSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(btnAdicionar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(btnVisualizar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addGap(8, 8, 8)))
-                                        .addGap(0, 19, Short.MAX_VALUE))))))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(inputSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(btnAdicionar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(btnVisualizar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addGap(8, 8, 8)))))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(142, 142, 142)
                         .addComponent(jLabel9)))
-                .addGap(95, 95, 95))
+                .addGap(95, 114, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -178,7 +226,7 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
                 .addComponent(jLabel9)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(inputID, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(inputId, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -197,18 +245,18 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
                     .addComponent(btnAdicionar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnVisualizar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnEditar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnApagar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnApagar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnEditar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(6, 6, 6))
         );
 
         setBounds(0, 0, 450, 300);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void inputIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputIDActionPerformed
+    private void inputIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputIdActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_inputIDActionPerformed
+    }//GEN-LAST:event_inputIdActionPerformed
 
     private void btnAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarActionPerformed
         
@@ -216,13 +264,17 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnAdicionarActionPerformed
 
     private void btnApagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnApagarActionPerformed
-        
+        apagar();
     }//GEN-LAST:event_btnApagarActionPerformed
 
     private void btnVisualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVisualizarActionPerformed
         
         consultar();  
     }//GEN-LAST:event_btnVisualizarActionPerformed
+
+    private void btnEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarActionPerformed
+       editar();    
+    }//GEN-LAST:event_btnEditarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -231,7 +283,7 @@ public class TelaUsuarios extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnEditar;
     private javax.swing.JButton btnVisualizar;
     private javax.swing.JTextField inputEmail;
-    private javax.swing.JTextField inputID;
+    private javax.swing.JTextField inputId;
     private javax.swing.JTextField inputNome;
     private javax.swing.JTextField inputSenha;
     private javax.swing.JLabel jLabel5;
